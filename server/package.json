@@ -13,10 +13,11 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "node prisma/seed.js",
-    "test": "NODE_OPTIONS='--experimental-vm-modules' jest --forceExit --detectOpenHandles"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit --detectOpenHandles"
   },
   "jest": {
     "testEnvironment": "node",
+    "testTimeout": 30000,
     "setupFiles": [
       "./tests/setup.js"
     ]

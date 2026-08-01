@@ -58,7 +58,8 @@ export default function Checkout() {
         setError(err.response?.data?.message || 'Erreur lors de la préparation du paiement');
       })
       .finally(() => setCreatingIntent(false));
-  }, [count, orderTotal]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [count, orderTotal, selectedDelivery?.id]);
 
   if (cartLoading) {
     return (

@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/useAuth.jsx';
-import { CartProvider } from './context/useCart.jsx';
-import { WishlistProvider } from './context/useWishlist.jsx';
+import { AuthProvider } from './context/AuthProvider';
+import { CartProvider } from './context/CartProvider';
+import { WishlistProvider } from './context/WishlistProvider';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import ProtectedRoute from './components/layout/ProtectedRoute';

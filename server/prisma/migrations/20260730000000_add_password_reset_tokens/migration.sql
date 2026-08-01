@@ -1,6 +1,3 @@
--- AlterTable
-ALTER TABLE "Order" ADD CONSTRAINT "Order_paymentIntentId_key" UNIQUE ("paymentIntentId");
-
 -- CreateTable
 CREATE TABLE "PasswordResetToken" (
     "id" TEXT NOT NULL,

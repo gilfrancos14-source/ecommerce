@@ -19,6 +19,13 @@ export default function ResetPassword() {
     }
   }, [resetToken, navigate]);
 
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => navigate('/login'), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, navigate]);
+
   if (!resetToken) return null;
 
   const handleSubmit = async (e) => {
@@ -45,13 +52,6 @@ export default function ResetPassword() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => navigate('/login'), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [success, navigate]);
 
   return (
     <div className="px-[16px] md:px-[40px] max-w-md mx-auto py-24">

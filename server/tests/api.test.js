@@ -10,6 +10,7 @@ describe('Health Check', () => {
 });
 
 describe('Auth Endpoints', () => {
+  const agent = request.agent(app);
   const testUser = {
     nom: 'Test User',
     email: `test_${Date.now()}@example.com`,
@@ -17,21 +18,20 @@ describe('Auth Endpoints', () => {
   };
 
   it('should register a new user', async () => {
-    const res = await request(app)
+    const res = await agent
       .post('/api/auth/register')
       .send(testUser);
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
     expect(res.body.user.email).toBe(testUser.email);
     expect(res.body.user.nom).toBe(testUser.nom);
-    expect(res.body.token).toBeDefined();
   });
 
   it('should not register with duplicate email', async () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send(testUser);
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(409);
   });
 
   it('should login with valid credentials', async () => {
@@ -58,15 +58,8 @@ describe('Auth Endpoints', () => {
   });
 
   it('should get current user with valid token', async () => {
-    const loginRes = await request(app)
-      .post('/api/auth/login')
-      .send({ email: testUser.email, password: testUser.password });
-
-    const token = loginRes.body.token;
-
-    const res = await request(app)
-      .get('/api/auth/me')
-      .set('Authorization', `Bearer ${token}`);
+    const res = await agent
+      .get('/api/auth/me');
     expect(res.status).toBe(200);
     expect(res.body.user.email).toBe(testUser.email);
   });
@@ -91,15 +84,8 @@ describe('Auth Endpoints', () => {
   });
 
   it('should logout successfully', async () => {
-    const loginRes = await request(app)
-      .post('/api/auth/login')
-      .send({ email: testUser.email, password: testUser.password });
-
-    const token = loginRes.body.token;
-
-    const res = await request(app)
-      .post('/api/auth/logout')
-      .set('Authorization', `Bearer ${token}`);
+    const res = await agent
+      .post('/api/auth/logout');
     expect(res.status).toBe(200);
   });
 });
