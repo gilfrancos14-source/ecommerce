@@ -2,6 +2,17 @@
 
 Application e-commerce full-stack de vêtements et accessoires premium.
 
+## Description du projet
+
+LUXE est une boutique en ligne complète qui permet à un visiteur de parcourir un catalogue de produits (avec variantes : couleurs, tailles), de les ajouter à son panier et à sa liste de souhaits, puis de passer commande et payer en ligne via Stripe.
+
+Le projet se compose de deux applications :
+
+- **`client/`** — une application React (SPA) qui gère l'interface utilisateur : pages publiques (accueil, catalogue, fiches produit), pages client (panier, commandes, compte) et un espace d'administration.
+- **`server/`** — une API REST Express qui expose les données et la logique métier : authentification, produits, panier, commandes, paiements, avis, administration. Les données sont stockées dans PostgreSQL via Prisma.
+
+L'application est pensée pour être exploitable de bout en bout : de l'inscription d'un client jusqu'à la livraison de sa commande, avec un tableau de bord pour l'administrateur.
+
 ## Architecture
 
 ```
@@ -17,6 +28,37 @@ ecommerce/
 | Frontend | React 19, React Router 6, Vite 8, Tailwind CSS 4, Stripe, Recharts |
 | Backend | Node.js, Express 4, Prisma, PostgreSQL (Neon), Stripe, Zod |
 | Services externes | Brevo (emails), Cloudinary (images), Google OAuth |
+
+## Comment ça fonctionne
+
+### Parcours client
+
+1. **Navigation** — un visiteur consulte le catalogue (`/products`), les catégories et les fiches produit. Les images sont servies depuis Cloudinary.
+2. **Panier** — il ajoute des produits (ou des variantes) à son panier. Le panier est stocké en base et lié au compte utilisateur.
+3. **Commande** — le client renseigne son adresse de livraison, choisit un mode de livraison (la livraison devient gratuite au-delà d'un seuil), puis arrive sur le paiement.
+4. **Paiement Stripe** — le serveur calcule le total et crée un `PaymentIntent` Stripe (`POST /api/payments/create-intent`). Le client le confirme avec Stripe Elements. La commande n'est créée qu'après confirmation du paiement.
+5. **Confirmation du paiement** — le serveur vérifie le statut du `PaymentIntent` à la création de la commande, et un webhook (`POST /api/payments/webhook`) confirme le règlement et passe la commande en `CONFIRMED`.
+6. **Suivi de commande** — l'administrateur peut expédier puis livrer la commande. Chaque changement de statut (confirmation, expédition, livraison) déclenche un email transactionnel Brevo au client.
+7. **Emails** — Brevo envoie : confirmation de commande, notification d'expédition, notification de livraison et code de réinitialisation de mot de passe.
+
+### Parcours administrateur
+
+L'espace admin (`/admin`, réservé aux comptes avec le rôle `ADMIN`) permet de :
+
+- suivre les statistiques (ventes, chiffre d'affaires, alertes de stock) via un dashboard Recharts
+- gérer les produits, leurs variantes et les catégories (avec upload d'images via Cloudinary)
+- gérer les commandes : changement de statut, expédition (numéro de suivi, transporteur), livraison
+- gérer les utilisateurs (attribution du rôle) et les modes de livraison
+
+### Flux d'authentification
+
+- **Inscription / connexion** : le serveur génère un JWT stocké dans un **cookie httpOnly** (sécurisé en production) — le token n'est jamais exposé au JavaScript.
+- **Google OAuth** : connexion via Google OAuth 2.0 (routes `/api/auth/google`).
+- **Mot de passe oublié** : l'utilisateur reçoit un code à 6 chiffres par email (Brevo), le vérifie, puis obtient un token de réinitialisation temporaire pour définir un nouveau mot de passe.
+
+### Structure d'un appel API
+
+Le client appelle le serveur via une instance axios (`client/src/utils/api.js`) qui inclut automatiquement les cookies. Le serveur valide chaque requête avec **Zod**, protège les routes avec un middleware JWT (`protect`), et limite le débit (`express-rate-limit`) pour prévenir les abus. Les erreurs sont normalisées par un handler central (`server/src/middleware/errorHandler.js`).
 
 ### Fonctionnalités
 
