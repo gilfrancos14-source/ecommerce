@@ -44,22 +44,25 @@ ecommerce/
 ```bash
 git clone https://github.com/gilfrancos14-source/ecommerce.git
 cd ecommerce
+```
 
-cd client
+Installer les dépendances du serveur :
+
+```bash
+cd server
 npm install
+```
 
-cd ../server
+Puis celles du client (dans un autre terminal ou en revenant à la racine) :
+
+```bash
+cd ../client
 npm install
 ```
 
 ### 2. Configurer le serveur
 
-Copier `server/.env.example` vers `server/.env` et renseigner les valeurs :
-
-```bash
-cd server
-cp .env.example .env
-```
+Depuis le dossier `server/`, copier `.env.example` vers `.env` et renseigner les valeurs :
 
 Variables requises :
 
@@ -92,8 +95,9 @@ VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
 
 ### 4. Migrations et données de test
 
+Depuis le dossier `server/` :
+
 ```bash
-cd server
 npx prisma migrate deploy   # appliquer les migrations en base
 npx prisma generate         # générer le client Prisma
 npm run prisma:seed         # (optionnel) insérer des données de démonstration
@@ -101,14 +105,16 @@ npm run prisma:seed         # (optionnel) insérer des données de démonstratio
 
 ## Lancer le projet
 
-### Serveur API
+Il faut **deux terminaux séparés** : un pour le serveur, un pour le client. Lancez toujours le serveur en premier.
+
+### Terminal 1 — Serveur API
 
 ```bash
 cd server
 npm run dev        # démarre avec nodemon sur http://localhost:5000
 ```
 
-### Client
+### Terminal 2 — Client
 
 ```bash
 cd client
@@ -146,19 +152,19 @@ Toutes les routes sont préfixées par `/api`.
 | Module | Routes |
 |--------|--------|
 | Auth | `/auth/register`, `/auth/login`, `/auth/logout`, `/auth/me`, `/auth/profile`, `/auth/forgot-password`, `/auth/verify-reset-code`, `/auth/reset-password`, `/auth/change-password` |
-| Utilisateurs | `/users` |
-| Produits | `/products` |
+| Google OAuth | `/auth/google`, `/auth/google/callback` |
+| Utilisateurs | `/users/:id` |
+| Produits | `/products`, `/products/featured`, `/products/:slug` |
 | Catégories | `/categories` |
-| Variantes | `/variants` |
+| Variantes | `/variants/product/:productId` |
 | Panier | `/cart` |
 | Commandes | `/orders` |
-| Paiement | `/payments` (dont webhook Stripe) |
+| Paiement | `/payments/create-intent`, `/payments/webhook` (POST, webhook Stripe) |
 | Avis | `/products/:productId/reviews` |
 | Wishlist | `/wishlist` |
 | Newsletter | `/newsletter` |
 | Livraison | `/delivery-methods` |
 | Admin | `/admin` |
-| Google OAuth | `/google` |
 
 ## Tests
 
